@@ -19,7 +19,6 @@ def query_db(question_db, q_id, ans):
             for ans_id, _, is_ans_correct in ans:
                 if is_ans_correct == "yes":
                     options.append(ans_id)
-                    break
             if options == []:
                 for ans_id, _, is_ans_correct in ans:
                     if is_ans_correct != "no":
@@ -109,7 +108,7 @@ with webdriver.Chrome(executable_path="/Users/aug/chromedriver") as browser:
 
     while input("START?") != "s":
         # MAIN
-        for i in range(100):
+        for question in range(100):
             inputs = browser.find_elements_by_css_selector("label.answer_row > span.answer_input > input.question_input")
             #options = browser.find_elements_by_css_selector("label.answer_row > div.answer_label")
             #question = browser.find_element_by_css_selector("div.question_text")
@@ -121,21 +120,25 @@ with webdriver.Chrome(executable_path="/Users/aug/chromedriver") as browser:
                 ans.append(aid)
             ans = query_db(question_db, qid, ans)
 
-            if len(ans) == 1:
+            if ans:
                 for i in inputs:
                     input_id = i.get_attribute("id")
                     m = re.match("(question_\d+)_(answer_\d+)", input_id)
                     qid, aid = m.group(1), m.group(2)
                     if aid == ans[0]:
                         i.click()
-                        break
-            else:
+            
+            if len(ans) != 1:
+                print("QUESTION: ", question+1)
                 browser.find_element_by_css_selector("a.flag_question").click()
-
+            
             # NEXT QUESTION
-            browser.find_element_by_css_selector("button.next-question").click()
-            sleep(0.5)
-        
+            try:
+                browser.find_element_by_css_selector("button.next-question").click()
+                sleep(0.5)
+            except:
+                pass
+
          # SUBMIT
         #browser.find_element_by_id("submit_quiz_button").click()
         #sleep(1)
